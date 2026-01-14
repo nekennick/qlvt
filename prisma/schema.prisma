@@ -10,6 +10,7 @@ datasource db {
 // Bảng lưu thông tin vật tư
 model Material {
   id          String   @id @default(cuid())
+  stt         String?             // Số thứ tự từ Excel
   maVT        String   @unique  // Mã vật tư - khóa chính logic
   tenVT       String              // Tên vật tư
   dvt         String?             // Đơn vị tính

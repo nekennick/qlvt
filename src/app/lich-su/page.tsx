@@ -58,8 +58,8 @@ export default async function LichSuPage({
                                     key={imp.id}
                                     href={`/lich-su?detail=${imp.id}`}
                                     className={`block p-4 rounded-xl border transition-all ${detailId === imp.id
-                                            ? "border-indigo-500 bg-indigo-500/10"
-                                            : "border-gray-700 hover:border-indigo-500/50 hover:bg-indigo-500/5"
+                                        ? "border-indigo-500 bg-indigo-500/10"
+                                        : "border-gray-700 hover:border-indigo-500/50 hover:bg-indigo-500/5"
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-2">
@@ -149,21 +149,21 @@ export default async function LichSuPage({
                                             </span>
                                         </div>
 
-                                        {change.changeType !== "NEW" && (
-                                            <div className="flex items-center gap-4 text-sm mt-2">
-                                                <span className="text-gray-400">
-                                                    {change.oldQuantity} → {change.newQuantity}
-                                                </span>
-                                                <span className={
-                                                    change.quantityDiff && change.quantityDiff > 0
-                                                        ? "text-green-400"
-                                                        : "text-red-400"
-                                                }>
-                                                    {change.quantityDiff && change.quantityDiff > 0 ? "+" : ""}
-                                                    {change.quantityDiff}
-                                                </span>
-                                            </div>
-                                        )}
+                                        <div className="flex items-center gap-4 text-sm mt-2">
+                                            <span className="text-gray-400">
+                                                {change.changeType === "NEW" ? "Mới" : change.oldQuantity}
+                                                {" → "}
+                                                {change.changeType === "REMOVED" ? "Hết" : change.newQuantity}
+                                            </span>
+                                            <span className={
+                                                change.quantityDiff && change.quantityDiff > 0
+                                                    ? "text-green-400"
+                                                    : "text-red-400"
+                                            }>
+                                                {change.quantityDiff && change.quantityDiff > 0 ? "+" : ""}
+                                                {change.quantityDiff}
+                                            </span>
+                                        </div>
 
                                         {change.note && (
                                             <p className="text-xs text-gray-500 mt-2">{change.note}</p>

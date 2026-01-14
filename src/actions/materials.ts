@@ -86,6 +86,7 @@ export async function commitImport(
 
             const material = await db.material.create({
                 data: {
+                    stt: rowData.stt,
                     maVT: rowData.maVT,
                     tenVT: rowData.tenVT,
                     dvt: rowData.dvt,
@@ -120,6 +121,7 @@ export async function commitImport(
             const material = await db.material.update({
                 where: { maVT: item.maVT },
                 data: {
+                    stt: rowData.stt,
                     tenVT: rowData.tenVT,
                     dvt: rowData.dvt,
                     soLo: rowData.soLo,
@@ -210,6 +212,7 @@ export async function commitImport(
                 await db.material.updateMany({
                     where: { maVT: rowData.maVT },
                     data: {
+                        stt: rowData.stt,
                         tenVT: rowData.tenVT,
                         dvt: rowData.dvt,
                         soLo: rowData.soLo,
@@ -250,8 +253,17 @@ export async function getMaterials(options?: {
     showInactive?: boolean;
     page?: number;
     limit?: number;
+    sortBy?: string;
+    order?: "asc" | "desc";
 }) {
-    const { search = "", showInactive = false, page = 1, limit = 20 } = options || {};
+    const {
+        search = "",
+        showInactive = false,
+        page = 1,
+        limit = 20,
+        sortBy = "updatedAt",
+        order = "desc"
+    } = options || {};
 
     const where = {
         ...(showInactive ? {} : { isActive: true }),
@@ -265,10 +277,18 @@ export async function getMaterials(options?: {
             : {}),
     };
 
+    // Xác định logic sắp xếp
+    let orderBy: any = { [sortBy]: order };
+
+    // Nếu sắp xếp theo stt, cần handle vì nó là string trong DB
+    if (sortBy === "stt") {
+        orderBy = { stt: order };
+    }
+
     const [materials, total] = await Promise.all([
         db.material.findMany({
             where,
-            orderBy: { updatedAt: "desc" },
+            orderBy,
             skip: (page - 1) * limit,
             take: limit,
         }),
