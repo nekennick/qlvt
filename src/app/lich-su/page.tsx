@@ -1,6 +1,7 @@
 import { getImportHistory, getImportChanges } from "@/actions/materials";
 import Link from "next/link";
 import { HistoryList } from "./HistoryList";
+import { ChangeDetails } from "./ChangeDetails";
 
 export default async function LichSuPage({
     searchParams,
@@ -17,20 +18,13 @@ export default async function LichSuPage({
     // Lấy ID của lần import gần nhất
     const latestImportId = imports.length > 0 ? imports[0].id : undefined;
 
-    const getChangeTypeLabel = (type: string) => {
-        switch (type) {
-            case "NEW":
-                return { label: "Mới", className: "badge-success" };
-            case "INCREASE":
-                return { label: "Tăng", className: "badge-success" };
-            case "DECREASE":
-                return { label: "Giảm", className: "badge-warning" };
-            case "REMOVED":
-                return { label: "Hết hàng", className: "badge-danger" };
-            default:
-                return { label: type, className: "badge-info" };
-        }
-    };
+    // Lấy thông tin tóm tắt của lần import được chọn
+    const selectedImport = imports.find(i => i.id === detailId);
+    const summary = selectedImport ? {
+        newItems: selectedImport.newItems,
+        updatedItems: selectedImport.updatedItems,
+        removedItems: selectedImport.removedItems,
+    } : { newItems: 0, updatedItems: 0, removedItems: 0 };
 
     return (
         <div className="animate-fade-in">
@@ -89,52 +83,10 @@ export default async function LichSuPage({
                             <p className="text-gray-400">Không có thay đổi nào</p>
                         </div>
                     ) : (
-                        <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                            {detailChanges.map((change) => {
-                                const typeInfo = getChangeTypeLabel(change.changeType);
-                                return (
-                                    <div
-                                        key={change.id}
-                                        className="p-4 rounded-xl border border-gray-700 bg-gray-800/50"
-                                    >
-                                        <div className="flex items-start justify-between mb-2 gap-4">
-                                            <div className="min-w-0 flex-1">
-                                                <span className="font-mono text-xs text-indigo-400">
-                                                    {change.material.maVT}
-                                                </span>
-                                                <p className="text-sm mt-1 font-medium truncate" title={change.material.tenVT}>
-                                                    {change.material.tenVT}
-                                                </p>
-                                            </div>
-                                            <span className={`badge flex-shrink-0 ${typeInfo.className}`}>
-                                                {typeInfo.label}
-                                            </span>
-                                        </div>
-
-                                        <div className="flex items-center gap-4 text-sm mt-3">
-                                            <span className="text-gray-400 font-mono">
-                                                {change.changeType === "NEW" ? "Mới" : change.oldQuantity}
-                                                {" → "}
-                                                {change.changeType === "REMOVED" ? "Hết" : change.newQuantity}
-                                            </span>
-                                            <span className={`font-bold ${change.quantityDiff && change.quantityDiff > 0
-                                                ? "text-green-400"
-                                                : "text-red-400"
-                                                }`}>
-                                                {change.quantityDiff && change.quantityDiff > 0 ? "+" : ""}
-                                                {change.quantityDiff}
-                                            </span>
-                                        </div>
-
-                                        {change.note && (
-                                            <p className="text-xs text-gray-500 mt-2 truncate" title={change.note}>
-                                                {change.note}
-                                            </p>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
+                        <ChangeDetails
+                            changes={detailChanges}
+                            summary={summary}
+                        />
                     )}
                 </div>
             </div>
