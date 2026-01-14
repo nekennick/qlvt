@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Bảng lưu thông tin vật tư
+model Material {
+  id          String   @id @default(cuid())
+  maVT        String   @unique  // Mã vật tư - khóa chính logic
+  tenVT       String              // Tên vật tư
+  dvt         String?             // Đơn vị tính
+  soLo        String?             // Số lô
+  noiSX       String?             // Nơi sản xuất
+  chatLuong   String?             // Chất lượng
+  soLuong     Float    @default(0) // Số lượng hiện tại
+  donGia      Float?              // Đơn giá
+  thanhTien   Float?              // Thành tiền
+  isActive    Boolean  @default(true) // true = còn hàng, false = đã hết
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  changes     MaterialChange[]   // Lịch sử thay đổi
+}
+
+// Bảng lưu lịch sử import
+model ImportHistory {
+  id          String   @id @default(cuid())
+  fileName    String              // Tên file import
+  importedAt  DateTime @default(now())
+  totalItems  Int                 // Tổng số vật tư trong file
+  newItems    Int      @default(0) // Số vật tư mới
+  updatedItems Int     @default(0) // Số vật tư cập nhật
+  removedItems Int     @default(0) // Số vật tư hết hàng
+  
+  changes     MaterialChange[]   // Các thay đổi trong lần import này
+}
+
+// Bảng lưu chi tiết thay đổi
+model MaterialChange {
+  id            String   @id @default(cuid())
+  materialId    String
+  material      Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  importId      String
+  import        ImportHistory @relation(fields: [importId], references: [id], onDelete: Cascade)
+  
+  changeType    String   // "NEW" | "INCREASE" | "DECREASE" | "REMOVED" | "INFO_UPDATE"
+  oldQuantity   Float?   // Số lượng cũ
+  newQuantity   Float?   // Số lượng mới
+  quantityDiff  Float?   // Chênh lệch (+/-)
+  note          String?  // Ghi chú thêm
+  
+  createdAt     DateTime @default(now())
+}
