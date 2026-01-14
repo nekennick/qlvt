@@ -18,8 +18,8 @@ export default async function VatTuPage({
     const page = parseInt(params.page || "1");
     const limit = parseInt(params.limit || "50");
     const showInactive = params.inactive === "true";
-    const sortBy = params.sortBy || "updatedAt";
-    const sortOrder = (params.order as "asc" | "desc") || "desc";
+    const sortBy = params.sortBy || "maVT";
+    const sortOrder = (params.order as "asc" | "desc") || "asc";
 
     const { materials, total, totalPages } = await getMaterials({
         search,
@@ -61,17 +61,17 @@ export default async function VatTuPage({
     };
 
     return (
-        <div className="animate-fade-in">
-            <div className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl font-bold gradient-text">Danh Sách Vật Tư</h1>
-                <Link href="/import" className="btn-primary">
+        <div className="animate-fade-in px-2">
+            <div className="flex items-center justify-between mb-4">
+                <h1 className="text-xl font-bold gradient-text">Danh Sách Vật Tư</h1>
+                <Link href="/import" className="btn-primary btn-sm">
                     + Import Excel
                 </Link>
             </div>
 
             {/* Search & Filters */}
-            <div className="glass-card p-4 mb-6">
-                <form className="flex gap-4 items-center">
+            <div className="glass-card p-3 mb-4">
+                <form className="flex gap-3 items-center">
                     <input type="hidden" name="limit" value={limit} />
                     <input type="hidden" name="sortBy" value={sortBy} />
                     <input type="hidden" name="order" value={sortOrder} />
@@ -82,20 +82,20 @@ export default async function VatTuPage({
                             name="search"
                             placeholder="Tìm kiếm theo mã VT hoặc tên..."
                             defaultValue={search}
-                            className="input-field"
+                            className="input-field input-sm"
                         />
                     </div>
-                    <label className="flex items-center gap-2 text-sm whitespace-nowrap">
+                    <label className="flex items-center gap-2 text-xs whitespace-nowrap text-gray-400">
                         <input
                             type="checkbox"
                             name="inactive"
                             value="true"
                             defaultChecked={showInactive}
-                            className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-indigo-500"
+                            className="w-3.5 h-3.5 rounded border-gray-600 bg-gray-700 text-indigo-500"
                         />
                         Hiện hết hàng
                     </label>
-                    <button type="submit" className="btn-primary">
+                    <button type="submit" className="btn-primary btn-sm">
                         Tìm kiếm
                     </button>
                 </form>
@@ -109,14 +109,14 @@ export default async function VatTuPage({
 
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                     <span>Hiển thị:</span>
-                    {[50, 100, 150].map((size) => (
+                    {[50, 100, -1].map((size) => (
                         <Link
                             key={size}
                             href={`/vat-tu?limit=${size}&search=${search}&inactive=${showInactive}`}
                             className={`px-2 py-1 rounded hover:bg-white/10 transition-colors ${limit === size ? "text-indigo-400 font-bold bg-indigo-500/10" : ""
                                 }`}
                         >
-                            {size}
+                            {size === -1 ? "Tất cả" : size}
                         </Link>
                     ))}
                 </div>

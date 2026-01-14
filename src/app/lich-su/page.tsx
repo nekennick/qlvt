@@ -1,5 +1,6 @@
 import { getImportHistory, getImportChanges } from "@/actions/materials";
 import Link from "next/link";
+import { HistoryList } from "./HistoryList";
 
 export default async function LichSuPage({
     searchParams,
@@ -13,12 +14,8 @@ export default async function LichSuPage({
     const { imports, total, totalPages } = await getImportHistory(page, 10);
     const detailChanges = detailId ? await getImportChanges(detailId) : null;
 
-    const formatDate = (date: Date) => {
-        return new Intl.DateTimeFormat("vi-VN", {
-            dateStyle: "full",
-            timeStyle: "short",
-        }).format(new Date(date));
-    };
+    // Lấy ID của lần import gần nhất
+    const latestImportId = imports.length > 0 ? imports[0].id : undefined;
 
     const getChangeTypeLabel = (type: string) => {
         switch (type) {
@@ -44,48 +41,11 @@ export default async function LichSuPage({
                 <div className="glass-card p-6">
                     <h2 className="text-xl font-bold mb-4">Danh sách lần Import</h2>
 
-                    {imports.length === 0 ? (
-                        <div className="text-center py-12">
-                            <svg className="w-16 h-16 mx-auto text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p className="text-gray-400">Chưa có lịch sử import</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {imports.map((imp) => (
-                                <Link
-                                    key={imp.id}
-                                    href={`/lich-su?detail=${imp.id}`}
-                                    className={`block p-4 rounded-xl border transition-all ${detailId === imp.id
-                                        ? "border-indigo-500 bg-indigo-500/10"
-                                        : "border-gray-700 hover:border-indigo-500/50 hover:bg-indigo-500/5"
-                                        }`}
-                                >
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="font-medium">{imp.fileName}</span>
-                                        <span className="text-xs text-gray-400">
-                                            {imp._count.changes} thay đổi
-                                        </span>
-                                    </div>
-                                    <div className="text-sm text-gray-400 mb-2">
-                                        {formatDate(imp.importedAt)}
-                                    </div>
-                                    <div className="flex gap-2 text-xs">
-                                        {imp.newItems > 0 && (
-                                            <span className="badge badge-success">+{imp.newItems} mới</span>
-                                        )}
-                                        {imp.updatedItems > 0 && (
-                                            <span className="badge badge-info">{imp.updatedItems} cập nhật</span>
-                                        )}
-                                        {imp.removedItems > 0 && (
-                                            <span className="badge badge-danger">-{imp.removedItems} hết</span>
-                                        )}
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
+                    <HistoryList
+                        imports={imports}
+                        detailId={detailId}
+                        latestImportId={latestImportId}
+                    />
 
                     {/* Pagination */}
                     {totalPages > 1 && (
@@ -137,36 +97,39 @@ export default async function LichSuPage({
                                         key={change.id}
                                         className="p-4 rounded-xl border border-gray-700 bg-gray-800/50"
                                     >
-                                        <div className="flex items-start justify-between mb-2">
-                                            <div>
-                                                <span className="font-mono text-sm text-indigo-400">
+                                        <div className="flex items-start justify-between mb-2 gap-4">
+                                            <div className="min-w-0 flex-1">
+                                                <span className="font-mono text-xs text-indigo-400">
                                                     {change.material.maVT}
                                                 </span>
-                                                <p className="text-sm mt-1">{change.material.tenVT}</p>
+                                                <p className="text-sm mt-1 font-medium truncate" title={change.material.tenVT}>
+                                                    {change.material.tenVT}
+                                                </p>
                                             </div>
-                                            <span className={`badge ${typeInfo.className}`}>
+                                            <span className={`badge flex-shrink-0 ${typeInfo.className}`}>
                                                 {typeInfo.label}
                                             </span>
                                         </div>
 
-                                        <div className="flex items-center gap-4 text-sm mt-2">
-                                            <span className="text-gray-400">
+                                        <div className="flex items-center gap-4 text-sm mt-3">
+                                            <span className="text-gray-400 font-mono">
                                                 {change.changeType === "NEW" ? "Mới" : change.oldQuantity}
                                                 {" → "}
                                                 {change.changeType === "REMOVED" ? "Hết" : change.newQuantity}
                                             </span>
-                                            <span className={
-                                                change.quantityDiff && change.quantityDiff > 0
-                                                    ? "text-green-400"
-                                                    : "text-red-400"
-                                            }>
+                                            <span className={`font-bold ${change.quantityDiff && change.quantityDiff > 0
+                                                ? "text-green-400"
+                                                : "text-red-400"
+                                                }`}>
                                                 {change.quantityDiff && change.quantityDiff > 0 ? "+" : ""}
                                                 {change.quantityDiff}
                                             </span>
                                         </div>
 
                                         {change.note && (
-                                            <p className="text-xs text-gray-500 mt-2">{change.note}</p>
+                                            <p className="text-xs text-gray-500 mt-2 truncate" title={change.note}>
+                                                {change.note}
+                                            </p>
                                         )}
                                     </div>
                                 );

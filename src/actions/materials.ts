@@ -79,15 +79,29 @@ export async function commitImport(
             },
         });
 
-        // Xử lý vật tư mới
+        // Xử lý vật tư mới (hoặc vật tư đã bị ẩn trước đó)
         for (const item of changes.newItems) {
             const rowData = data.find((d) => d.maVT === item.maVT);
             if (!rowData) continue;
 
-            const material = await db.material.create({
-                data: {
+            // Sử dụng upsert để xử lý cả trường hợp vật tư đã tồn tại nhưng bị ẩn
+            const material = await db.material.upsert({
+                where: { maVT: rowData.maVT },
+                create: {
                     stt: rowData.stt,
                     maVT: rowData.maVT,
+                    tenVT: rowData.tenVT,
+                    dvt: rowData.dvt,
+                    soLo: rowData.soLo,
+                    noiSX: rowData.noiSX,
+                    chatLuong: rowData.chatLuong,
+                    soLuong: rowData.soLuong,
+                    donGia: rowData.donGia,
+                    thanhTien: rowData.thanhTien,
+                    isActive: true,
+                },
+                update: {
+                    stt: rowData.stt,
                     tenVT: rowData.tenVT,
                     dvt: rowData.dvt,
                     soLo: rowData.soLo,
@@ -260,9 +274,9 @@ export async function getMaterials(options?: {
         search = "",
         showInactive = false,
         page = 1,
-        limit = 20,
-        sortBy = "updatedAt",
-        order = "desc"
+        limit = 50,
+        sortBy = "maVT",
+        order = "asc"
     } = options || {};
 
     const where = {
@@ -289,8 +303,10 @@ export async function getMaterials(options?: {
         db.material.findMany({
             where,
             orderBy,
-            skip: (page - 1) * limit,
-            take: limit,
+            ...(limit > 0 ? {
+                skip: (page - 1) * limit,
+                take: limit,
+            } : {}),
         }),
         db.material.count({ where }),
     ]);
@@ -300,7 +316,7 @@ export async function getMaterials(options?: {
         total,
         page,
         limit,
-        totalPages: Math.ceil(total / limit),
+        totalPages: limit > 0 ? Math.ceil(total / limit) : 1,
     };
 }
 

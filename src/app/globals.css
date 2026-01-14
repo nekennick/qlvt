@@ -70,12 +70,19 @@ body {
 .btn-primary {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
-  padding: 12px 24px;
-  border-radius: 12px;
+  padding: 10px 20px;
+  border-radius: 10px;
   font-weight: 600;
   transition: all 0.3s ease;
   border: none;
   cursor: pointer;
+  font-size: 0.9375rem;
+}
+
+.btn-primary.btn-sm {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.875rem;
 }
 
 .btn-primary:hover {
@@ -92,12 +99,19 @@ body {
 .btn-secondary {
   background: var(--secondary);
   color: var(--foreground);
-  padding: 12px 24px;
-  border-radius: 12px;
+  padding: 10px 20px;
+  border-radius: 10px;
   font-weight: 600;
   transition: all 0.3s ease;
   border: 1px solid var(--border);
   cursor: pointer;
+  font-size: 0.9375rem;
+}
+
+.btn-secondary.btn-sm {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.875rem;
 }
 
 .btn-secondary:hover {
@@ -109,11 +123,18 @@ body {
 .input-field {
   background: var(--secondary);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 16px;
+  border-radius: 10px;
+  padding: 10px 14px;
   color: var(--foreground);
   width: 100%;
   transition: all 0.3s ease;
+  font-size: 0.9375rem;
+}
+
+.input-field.input-sm {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.875rem;
 }
 
 .input-field:focus {

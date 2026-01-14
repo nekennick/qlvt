@@ -69,7 +69,7 @@ export function parseExcelFile(buffer: ArrayBuffer): MaterialRow[] {
         const thanhTien = getValue(row, ["Thành tiền", "Thanh tien"]);
 
         materials.push({
-            stt: getValue(row, ["STT"]) || "",
+            stt: getValue(row, ["STT", "Số TT", "Số Thứ Tự", "So TT", "So thu tu"]) || "",
             maVT,
             tenVT,
             dvt: dvt ? String(dvt) : null,
