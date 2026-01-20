@@ -36,18 +36,19 @@ function findColumnIndex(headerRow: any[], keys: string[]): number {
 function parseNumber(raw: any): number {
     if (raw === undefined || raw === null || raw === "") return 0;
 
-    if (typeof raw === "number") return raw;
+    if (typeof raw === "number") return raw / 100;
 
     const str = String(raw).trim();
 
-    // Kiểm tra xem số có định dạng với dấu phẩy làm phân cách thập phân không
-    // Ví dụ: "8,00" hoặc "1.234,56"
-    const commaDecimalMatch = str.match(/^[\d\s.]+,\d{2}$/);
-    if (commaDecimalMatch) {
-        // Định dạng châu Âu: 1.234,56 -> 1234.56
-        const cleaned = str.replace(/\s/g, "").replace(/\./g, "").replace(",", ".");
-        const val = parseFloat(cleaned);
-        return isNaN(val) ? 0 : val;
+    // Kiểm tra xem số có định dạng với dấu phẩy + 2 số thập phân ở cuối không
+    // Ví dụ: "8,00" hoặc "1.234,56" hoặc "600 800,00"
+    if (/,\d{2}$/.test(str)) {
+        // Thuật toán: Bỏ hết dấu chấm/phẩy/khoảng trắng, rồi chia 100
+        const cleanStr = str.replace(/[.,\s]/g, "");
+        const val = parseFloat(cleanStr);
+        const result = isNaN(val) ? 0 : val / 100;
+        console.log(`[parseNumber] Decimal: "${str}" -> "${cleanStr}" -> ${val} / 100 = ${result}`);
+        return result;
     }
 
     // Trường hợp số có dấu chấm làm phân cách hàng nghìn: 1.234.567
@@ -96,8 +97,8 @@ export function parseExcelFile(buffer: ArrayBuffer): MaterialRow[] {
     // Duyệt qua từng sheet để tìm dữ liệu
     for (const sheetName of workbook.SheetNames) {
         const worksheet = workbook.Sheets[sheetName];
-        // Sử dụng raw: false để lấy giá trị đã format (vd: "8,00")
-        const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false }) as any[][];
+        // Sử dụng raw: true để lấy giá trị số thực (vd: 1.00 thay vì "100")
+        const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true }) as any[][];
         console.log(`[Excel Parser] Checking sheet "${sheetName}": ${sheetData.length} rows`);
 
         if (sheetData.length === 0) continue;
@@ -161,8 +162,10 @@ export function parseExcelFile(buffer: ArrayBuffer): MaterialRow[] {
         const lowerMa = maVT.toLowerCase();
         if (lowerMa.includes("tổng") || lowerMa.includes("cộng") || lowerMa.includes("ghi chú")) continue;
 
-        // Lấy Số lượng
-        const soLuong = parseNumber(row[soLuongIndex]);
+        // Lấy Số lượng - DEBUG
+        const soLuongRaw = row[soLuongIndex];
+        console.log(`[Excel Parser] SoLuong raw: "${soLuongRaw}" (type: ${typeof soLuongRaw})`);
+        const soLuong = parseNumber(soLuongRaw);
 
         // Lấy các giá trị khác
         const stt = sttIndex !== -1 ? (row[sttIndex]?.toString().trim() || "") : "";
